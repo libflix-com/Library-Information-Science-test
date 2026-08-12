@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Library & Information Science Quiz</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --correct-bg: #dcfce7;
+            --correct-border: #22c55e;
+            --wrong-bg: #fee2e2;
+            --wrong-border: #ef4444;
+            --exp-bg: #e0f2fe;
+            --exp-border: #0ea5e9;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 80px; 
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 40px;
+            font-size: 0.95em;
+        }
+
+        .question-card {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .question {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.1s ease;
+            position: relative;
+        }
+
+        .option-label:hover:not(.locked) {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        /* Dynamic Classes */
+        .correct-answer {
+            background-color: var(--correct-bg) !important;
+            border-color: var(--correct-border) !important;
+            font-weight: bold;
+        }
+        
+        .wrong-answer {
+            background-color: var(--wrong-bg) !important;
+            border-color: var(--wrong-border) !important;
+            opacity: 0.8;
+        }
+
+        /* Telegram-style pop */
+        @keyframes telegramPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        .correct-pulse {
+            animation: telegramPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Instant Explanation Box */
+        .explanation {
+            display: none;
+            margin-top: 20px;
+            padding: 15px 20px;
+            background-color: var(--exp-bg);
+            border-left: 5px solid var(--exp-border);
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95em;
+            animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .locked { pointer-events: none; }
+
+        .gesture-icon {
+            font-size: 1.2em;
+            margin-right: 8px;
+            display: inline-block;
+        }
+
+        /* Sticky Score Banner */
+        #score-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--primary);
+            z-index: 1000;
+            border-top: 2px solid var(--primary);
+        }
+
+        .confetti-particle {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Library & Information Science Quiz</h1>
+    <p class="subtitle">Select an answer to instantly see the correct choice and explanation.</p>
+    
+    <form id="quizForm">
+        <!-- Quiz questions will be dynamically injected here by JavaScript -->
+    </form>
+</div>
+
+<div id="score-banner">
+    Score: <span id="current-score">0</span> / <span id="total-score">0</span>
+</div>
+
+<script>
+    // Complete Quiz Database
+    const quizData = [
+        {
+            q: "What does the acronym FRBR stand for?",
+            opts: ["Functional Requirements for Better Records", "Functional Requirements for Bibliographic Records", "Functional Records for Big Research Libraries", "Fundamental requirements for big research records"],
+            ans: 1,
+            exp: "FRBR (Functional Requirements for Bibliographic Records) is a conceptual entity-relationship model developed by IFLA that relates user tasks of retrieval and access in online library catalogues."
+        },
+        {
+            q: "Who has given the Sixth Law of Library: “Every reader his freedom”",
+            opts: ["Michael Gorman", "Dr S R Ranganathan", "James A Retting", "Alireza Noruzi"],
+            ans: 2,
+            exp: "James A. Retting proposed the Sixth Law ('Every reader his freedom') in 1992 as an extension to Ranganathan's original Five Laws of Library Science."
+        },
+        {
+            q: "Management, anesthesiology are the examples of:",
+            opts: ["Fission", "Distillation", "Fusion", "Clustering"],
+            ans: 1,
+            exp: "In Ranganathan's modes of formation of subjects, Distillation occurs when a pure discipline evolves as a primary science out of practical activities or actions (like Management or Research Methodology)."
+        },
+        {
+            q: "In which year, Dr S R Ranganathan was awarded Padmashri Award by the Government of India?",
+            opts: ["1955", "1960", "1957", "1950"],
+            ans: 2,
+            exp: "The Government of India awarded the Padmashri to Dr. S.R. Ranganathan in 1957 for his invaluable contributions to Library Science."
+        },
+        {
+            q: "Principle of Literary Warrant is given by",
+            opts: ["Eugene Garfield", "Dr S R Ranganathan", "Bradford", "E. Wyndham Hulme"],
+            ans: 3,
+            exp: "E. Wyndham Hulme coined the term 'Literary Warrant' in 1911, establishing the principle that a classification scheme should be based solely on literature that actually exists."
+        },
+        {
+            q: "Annals of Library and Information Studies is published by",
+            opts: ["DRTC", "IASLIC", "CSIR-NIScPR", "ILA"],
+            ans: 2,
+            exp: "It is published by CSIR-NIScPR (formerly NISCAIR), India's premier organization for science communication and policy research."
+        },
+        {
+            q: "Shodhgangotri is a database of :",
+            opts: ["Synopses", "MRPs/PDFs/Emeritus Fellowship", "PG Dissertations", "All of the above"],
+            ans: 0,
+            exp: "Shodhgangotri is an INFLIBNET initiative that hosts approved Synopses and research proposals of PhD scholars in Indian universities (research in progress)."
+        },
+        {
+            q: "Choose the Odd One out",
+            opts: ["Compilatio", "Copyleaks", "Quillbot", "DupliChecker"],
+            ans: 2,
+            exp: "Quillbot is an AI paraphrasing tool, whereas Compilatio, Copyleaks, and DupliChecker are Plagiarism Detection Softwares."
+        },
+        {
+            q: "Gujarat Public Libraries Act enacted in the year",
+            opts: ["1993", "2001", "2010", "1995"],
+            ans: 1,
+            exp: "The Gujarat Public Libraries Act was passed by the state legislature in 2001."
+        },
+        {
+            q: "Dewey Decimal Classification is an example of:",
+            opts: ["Faceted Classification", "Chain Classification", "Enumerative Classification", "Alphabetical Classification"],
+            ans: 2,
+            exp: "DDC is primarily an Enumerative Classification system, meaning it attempts to list (enumerate) all possible subjects systematically, though newer editions have some faceted elements."
+        },
+        {
+            q: "Which of the following is NOT a Knowledge Organization System?",
+            opts: ["Taxonomy", "Ontology", "Thesaurus", "Word Processor"],
+            ans: 3,
+            exp: "A Word Processor is software for typing documents. Taxonomies, Ontologies, and Thesauri are all frameworks used to organize and map knowledge."
+        },
+        {
+            q: "Ranganathan studied under:",
+            opts: ["Charles Cutter", "Melvil Dewey", "W. C. Berwick Sayers", "HE Bliss"],
+            ans: 2,
+            exp: "Ranganathan travelled to London in 1924 where he studied at University College London under W.C. Berwick Sayers, Chief Librarian of Croydon Public Libraries."
+        },
+        {
+            q: "Δ' symbol in CIolon Classification represents",
+            opts: ["Library Science", "Spiritual Experience and Mysticism", "Fiction", "Generalia"],
+            ans: 1,
+            exp: "In Colon Classification, the Greek letter Delta (Δ) is uniquely used to represent Spiritual Experience and Mysticism, positioned centrally between the Sciences and Humanities."
+        },
+        {
+            q: "Which edition of Colon Classification introduced the generalized PMEST categories?",
+            opts: ["Third Edition", "Fourth Edition", "Fifth Edition", "Sixth Edition"],
+            ans: 1,
+            exp: "The Fourth Edition (1952) fully generalized the PMEST categories by assigning unique punctuation marks (comma, semicolon, colon, dot, apostrophe) to each facet."
+        },
+        {
+            q: "The notation of Colon Classification has a base of:",
+            opts: ["10 characters", "26 characters", "52 characters", "74 characters and symbols"],
+            ans: 3,
+            exp: "The 6th revised edition of CC uses a massive mixed base of 74 characters (Indo-Arabic numerals, Roman capitals, Roman lower case, Greek symbols, and punctuation indicators)."
+        },
+        {
+            q: "Editor of the 19th edition of DDC",
+            opts: ["Milton J. Fergusom", "Melvil Dewey", "Benjamin A. Custer", "J.P. Comaromi"],
+            ans: 2,
+            exp: "Benjamin A. Custer served as the principal editor for the 16th through 19th editions of the Dewey Decimal Classification."
+        },
+        {
+            q: "Astronomy' is represented by Class No. in DDC",
+            opts: ["510", "520", "530", "560"],
+            ans: 1,
+            exp: "In DDC, 520 is the main class for Astronomy and allied sciences (510 is Math, 530 is Physics)."
+        },
+        {
+            q: "Subject Classification was given by",
+            opts: ["HE Bliss", "CA Cutter", "J D Brown", "Dr S R Ranganathan"],
+            ans: 2,
+            exp: "James Duff Brown devised the Subject Classification in 1906, notable for its 'one-place' theory of classification."
+        },
+        {
+            q: "Which type of research output measurement tracks metrics on Social Media",
+            opts: ["Bibliometrics", "Scientometrics", "Altmetrics", "Librametrics"],
+            ans: 2,
+            exp: "Altmetrics (Alternative Metrics) tracks non-traditional attention such as mentions on Twitter (X), Facebook, blogs, news outlets, and policy documents."
+        },
+        {
+            q: "The following is a collaborative network of Reference Librarians",
+            opts: ["Worldcat", "INDEST", "Question point", "Global scholar"],
+            ans: 2,
+            exp: "QuestionPoint was an online cooperative virtual reference service initiated by OCLC and the Library of Congress."
+        },
+        {
+            q: "‘Communities’ is a component of which of the digital library software?",
+            opts: ["GSDL", "DSpace", "Fedora", "SOUL"],
+            ans: 1,
+            exp: "In DSpace, content is logically organized in a hierarchy: Communities, Sub-communities, Collections, and Items."
+        },
+        {
+            q: "Which of the following is NOT a journal evaluation metric used by Scopus?",
+            opts: ["h-index", "CiteScore", "Impact Factor", "SNIP"],
+            ans: 2,
+            exp: "The 'Impact Factor' (JIF) is a proprietary metric owned by Clarivate Analytics (Web of Science). Scopus uses CiteScore, SNIP, and SJR."
+        },
+        {
+            q: "Which metric introduced in 2016 provides citation data for journals in Scopus?",
+            opts: ["SCImago Journal Rank", "CiteScore", "h-Index", "SNIP"],
+            ans: 1,
+            exp: "Elsevier launched CiteScore in 2016 as a direct competitor to the Impact Factor, calculating average citations over a 3-4 year period for Scopus-indexed titles."
+        },
+        {
+            q: "Which test is used to find an association between two categorical variables",
+            opts: ["t-test", "ANOVA", "Chi-square test", "Mann–Whitney U test"],
+            ans: 2,
+            exp: "The Chi-square (χ2) test of independence determines whether there is a statistically significant relationship between two categorical (nominal) variables."
+        },
+        {
+            q: "Claude Shannon is known as the father of which field ?",
+            opts: ["Thermodynamics", "Cataloguing", "Bibliometrics", "Information Theory"],
+            ans: 3,
+            exp: "Shannon founded Information Theory with his landmark 1948 paper 'A Mathematical Theory of Communication', establishing how digital data can be quantified and transmitted."
+        },
+        {
+            q: "The first national librarian of independent India",
+            opts: ["Dr S R Ranganathan", "D.B. Krishna Rao", "B. S. Kesavan", "Kalpana Dasgupta"],
+            ans: 2,
+            exp: "Bellary Shamanna Kesavan (B.S. Kesavan) became the first National Librarian of independent India in 1947, transforming the Imperial Library into the National Library in Calcutta."
+        },
+        {
+            q: "As per Prof S R Rangnathan, the library is a combination of three elements, and those are:",
+            opts: ["Building, Books and Readers", "Men, Money and Material", "Readers, Books and Staff", "Right environment, Readers, Reading Material"],
+            ans: 2,
+            exp: "Ranganathan defined a library functionally as a trinity consisting of Books (resources), Readers (users), and Staff (intermediaries)."
+        },
+        {
+            q: "In the modern era, changes in library management redefined the concept of “Ownership” as?",
+            opts: ["Free Good", "Burden", "Responsibility", "Access"],
+            ans: 3,
+            exp: "Due to digital licensing and databases, the library paradigm shifted from physical 'Ownership' of materials to providing seamless 'Access' to information."
+        },
+        {
+            q: "Who is the “Visitor” of National Library as per the National Library of India Act, 1976",
+            opts: ["Ministry of Culture", "Prime Minister", "President of India", "Vice President of India"],
+            ans: 2,
+            exp: "Under the National Library of India Act 1976, the President of India is formally designated as the Visitor of the National Library."
+        },
+        {
+            q: "What type of classification system allows multiple classifications for an object?",
+            opts: ["Enumerative", "Hierarchical", "Faceted", "National"],
+            ans: 2,
+            exp: "Faceted classification breaks subjects down into mutually exclusive facets, allowing an object to be assigned multiple independent classification tags simultaneously."
+        },
+        {
+            q: "In Colon Classification which fundamental category is represented by the “:” (colon symbol)?",
+            opts: ["Personality", "Matter", "Energy", "Space"],
+            ans: 2,
+            exp: "In PMEST, the colon (:) indicates the Energy facet (representing action, operation, or problem)."
+        },
+        {
+            q: "According to S. R. Ranganathan, the three planes of work in classification are:",
+            opts: ["Idea Plane, Verbal Plane, Notational Plane", "Conceptual Plane, Physical Plane, Verbal Plane", "Subject Plane, Class Plane, Book Plane", "Idea Plane, Book Plane, Index Plane"],
+            ans: 0,
+            exp: "The work of designing a classification system occurs across three planes: Idea (conceptualizing), Verbal (naming terms), and Notational (assigning symbols)."
+        },
+        {
+            q: "In Chain Index Method what is meant by unsought link?",
+            opts: ["It is a link between other links", "It ends with no symbol", "It leads to unsought material", "It does not lead to any material"],
+            ans: 3,
+            exp: "An unsought link represents a concept in the hierarchy that is deemed highly unlikely to be used as a search term by a reader, hence it is bypassed in index generation."
+        },
+        {
+            q: "What is the first step in assigning a classification number in Colon Classification?",
+            opts: ["Assign the first facet", "Use a colon to separate facets", "Choose the subject category", "Analyze the facets involved"],
+            ans: 3,
+            exp: "The very first step is to analyze the raw title into its constituent facets and determine the overarching Main Class (subject category) before assigning symbols."
+        },
+        {
+            q: "Reordering Ranganathan: Shifting User Behaviors, Shifting Priorities: A Report authored by",
+            opts: ["M A Gopinath", "Michael Gorman", "Lynn Silipigni Connaway", "Lorcan Dempsey"],
+            ans: 2,
+            exp: "Lynn Silipigni Connaway (along with Ixchel Faniel) authored this influential OCLC report that mapped Ranganathan’s Five Laws to modern digital user behaviors."
+        },
+        {
+            q: "Who developed the Shared Electronic Resource Understanding (SERU) as recommended practice for electronic resources license agreement?",
+            opts: ["Association of Research Libraries", "NISO", "ONOS", "Centre for Research Libraries"],
+            ans: 1,
+            exp: "SERU is a NISO (National Information Standards Organization) recommended practice that offers publishers and libraries an alternative to complex, negotiated license agreements."
+        },
+        {
+            q: "Which one of these organizations created 'Core Competencies for Scholarly Communication Librarians'?",
+            opts: ["NASIG", "SPARC", "UKSG", "FORCE11"],
+            ans: 0,
+            exp: "NASIG (North American Serials Interest Group) developed this framework to define the skills required for modern scholarly communication roles."
+        },
+        {
+            q: "What is the main source of income for the public libraries in those states where legislation have been enacted?",
+            opts: ["Tax revenues", "Grants under centrally sponsored schemes", "Library Cess", "Private Philanthropic Contributions"],
+            ans: 2,
+            exp: "In Indian states with library legislation (like Madras, Andhra Pradesh), Library Cess—a surcharge collected alongside property taxes—is the primary dedicated income source."
+        },
+        {
+            q: "Which Plagiarism Detection Software is currently provided by the INFLIBNET?",
+            opts: ["Turnitin", "DrillBit", "Ouriginal", "Urkund"],
+            ans: 1,
+            exp: "INFLIBNET currently provides 'DrillBit' under its ShodhShuddhi initiative to all Indian universities (previously providing Urkund/Ouriginal)."
+        },
+        {
+            q: "How many parts is an ISBN-13-digit number made of?",
+            opts: ["4 Parts", "5 Parts", "6 Parts", "7 Parts"],
+            ans: 1,
+            exp: "An ISBN-13 consists of 5 parts: 1) GS1 Prefix (978/979), 2) Registration group, 3) Registrant/Publisher, 4) Publication item, and 5) Check digit."
+        },
+        {
+            q: "Who has written the book \"Introduction to Knowledge Organization\"",
+            opts: ["Richard Smiraglia", "Claudio Gnoli", "M. Lopez-Huertas", "S.R. Ranganathan"],
+            ans: 1,
+            exp: "Claudio Gnoli is the author of 'Introduction to Knowledge Organization' (2020), mapping modern theories of KO."
+        },
+        {
+            q: "Who has invented the \"Dictionary Catalogue\"",
+            opts: ["S.R. Ranganathan", "D.B. Krishna Rao", "C.A. Cutter", "D.J. Foskett"],
+            ans: 2,
+            exp: "Charles Ammi Cutter published his 'Rules for a Dictionary Catalog' in 1876, establishing the standard of interfiling author, title, and subject entries alphabetically."
+        },
+        {
+            q: "In the formation of subjects, complex subjects are formed by which modes?",
+            opts: ["Fission", "Loose Assemblage", "Loose Lamination", "Fusion"],
+            ans: 1,
+            exp: "Loose Assemblage occurs when two or more independent subjects are brought together to study their relationship (e.g., Psychology for Nurses), creating a complex subject."
+        },
+        {
+            q: "Find out the odd one out in relation to Dr. S R Ranganathan.",
+            opts: ["University of Madras", "University of Delhi", "University of Calcutta", "Banaras Hindu University"],
+            ans: 2,
+            exp: "Ranganathan established LIS departments and served extensively at Madras, BHU, and Delhi. He had no direct professional affiliation with the University of Calcutta."
+        },
+        {
+            q: "Which of the following current online systems is conceptually most similar to Vannevar Bush’s proposed 'Memex'?",
+            opts: ["Book typesetting software", "Wikipedia", "Video conferencing software", "Online banking applications"],
+            ans: 1,
+            exp: "Bush envisioned Memex in 1945 as a desk that linked relevant documents via associative trails—exactly how Wikipedia and the World Wide Web operate via hyperlinks today."
+        },
+        {
+            q: "What is the digital-age equivalent of “Books are for use”?",
+            opts: ["Open Access", "Online Bookstores", "Copyright", "Paywalls"],
+            ans: 0,
+            exp: "Open Access embodies Ranganathan's First Law by removing financial and copyright barriers, ensuring digital research is freely available for use by anyone globally."
+        },
+        {
+            q: "Reflecting his first discipline, Ranganathan wrote a full-length biography of which figure?",
+            opts: ["C.V. Raman", "P.C. Mahalanobis", "Jagdish Chandra Bose", "Srinivasa Ramanujan"],
+            ans: 3,
+            exp: "Before becoming a librarian, Ranganathan was a mathematics professor. He authored 'Ramanujan: The Man and the Mathematician' honoring the Indian math genius."
+        },
+        {
+            q: "Sixth edition of Colon Classification is best described as which kind of scheme?",
+            opts: ["Enumerative", "Alphabetico-direct", "Analytico-synthetic", "Dictionary"],
+            ans: 2,
+            exp: "Colon Classification is the prime example of a freely faceted Analytico-synthetic classification scheme, building class numbers dynamically."
+        },
+        {
+            q: "Ranganathan credited a demonstration in a London department store with giving him the idea that class numbers should be assembled from standard components rather than supplied ready-made. What was being demonstrated?",
+            opts: ["Meccano set", "A card-index filing cabinet", "A mechanical printing press", "A computer"],
+            ans: 0,
+            exp: "Watching a Meccano set demonstration in Selfridges, London, sparked Ranganathan's idea for faceted classification: combining standard disparate pieces to build unique combinations."
+        },
+        {
+            q: "Faceted classification survives today most visibly in which everyday practice?",
+            opts: ["Faceted filters in online shopping websites", "Optical character recognition in books", "Boolean operators in full-text search", "MARC records for bibliographic exchange"],
+            ans: 0,
+            exp: "E-commerce sites (like Amazon) use faceted navigation to let users filter search results independently by brand, price, color, size, etc."
+        },
+        // --- 25 Original Questions appended below ---
+        {
+            q: "Ranganathan donated his life savings to the University of Madras to endow a professorship in library science. The chair was named after:",
+            opts: ["His grandfather", "Himself", "His wife (Sarada)", "His teacher (Edward B. Ross)"],
+            ans: 2,
+            exp: "In 1957, he donated one lakh rupees to establish the Sarada Ranganathan Professorship, honoring his wife who lived frugally to make the savings possible."
+        },
+        {
+            q: "ORCID provides:",
+            opts: ["An international license for reusing published work", "An international unique identifier for institutions", "A persistent unique identifier for individual researchers", "An international individual identifier for libraries"],
+            ans: 2,
+            exp: "ORCID provides a 16-digit ID to resolve name ambiguity and accurately attribute a researcher's scholarly work throughout their career."
+        },
+        {
+            q: "In a thesaurus, relationships between terms are expressed principally as:",
+            opts: ["Class number, index entry, and cross reference", "Broader term, narrower term, and related term", "Main entry, added entry, and tracing", "Precision, recall, and relevance"],
+            ans: 1,
+            exp: "Thesauri map relationships systematically using BT (Broader Term), NT (Narrower Term), and RT (Related Term)."
+        },
+        {
+            q: "What do OAI-PMH, Z39.50, and SRU/SRW have in common?",
+            opts: ["They preserve digital content for long-term archival access", "They organize knowledge using standardized classification schemes", "They are primarily used for digitising library documents", "They help different systems share or discover information"],
+            ans: 3,
+            exp: "All three are communication and interoperability protocols that allow different digital repositories and library catalogs to exchange metadata."
+        },
+        {
+            q: "What is the main benefit of the APUPA shelf arrangement?",
+            opts: ["Keeping the same author's books together", "Serendipitous discovery of related books", "Minimising total library book purchases", "Chronological arrangement of books on shelf"],
+            ans: 1,
+            exp: "APUPA places core subjects in the center flanked by related ones, maximizing a user's chances of discovering highly relevant materials while browsing."
+        },
+        {
+            q: "Why is “hospitality” an important quality of classification notation?",
+            opts: ["It keeps the notation concise", "It maintains a fixed subject order", "It simplifies shelf arrangement", "It accommodates new subjects flexibly"],
+            ans: 3,
+            exp: "Hospitality allows a scheme to grow. When new disciplines emerge, they can be inserted logically into a chain without disrupting existing numbers."
+        },
+        {
+            q: "A librarian arranges historical events chronologically because users are most likely to find that order meaningful. Which principle is being applied?",
+            opts: ["Cow calf principle", "Canon of decreasing extension", "Helpful sequence", "Principle of local variation"],
+            ans: 2,
+            exp: "The Principle of Chronological Sequence is a sub-principle of Helpful Sequence, which dictates arranging items in the most logical order for users."
+        },
+        {
+            q: "A modern library uses usage data to decide which resources to acquire, where to place services, and when to schedule staff. Which Ranganathan idea is hiding in plain sight?",
+            opts: ["Librametry", "Hospitality", "APUPA", "Canons of cataloguing"],
+            ans: 0,
+            exp: "Coined in 1948, Librametry refers to applying statistical metrics to optimize library operations—the precursor to modern data analytics!"
+        },
+        {
+            q: "Who devised the logical operators: AND, OR, NOT?",
+            opts: ["Charles Babbage", "S.R. Ranganathan", "George Boole", "Vannever Bush"],
+            ans: 2,
+            exp: "George Boole established Boolean logic in 1854, laying the algebraic foundation for all modern database search engines."
+        },
+        {
+            q: "Universal Availability of Publications (UAP) was a major core program of which organization?",
+            opts: ["OCLC", "IFLA", "UNESCO", "Library of Congress"],
+            ans: 1,
+            exp: "Initiated by IFLA, UAP's goal was to ensure publications are available to anyone globally through robust interlibrary loan and publishing frameworks."
+        },
+        {
+            q: "Find out the odd one among these:",
+            opts: ["ePUB", "eINK", "RTF", "PDF"],
+            ans: 1,
+            exp: "eINK is a hardware display screen technology used in reading devices (like Kindles), whereas ePUB, RTF, and PDF are all software file formats."
+        },
+        {
+            q: "Google Bard was rebranded to which name in 2024?",
+            opts: ["Google AI", "Google LLM", "Google Gemini", "Google DeepMind"],
+            ans: 2,
+            exp: "In February 2024, Google unified its AI assistant, Bard, and enterprise tools under the 'Gemini' brand name."
+        },
+        {
+            q: "Preprints' was established by MDPI in which year?",
+            opts: ["2006", "2016", "2026", "None of among these"],
+            ans: 1,
+            exp: "MDPI launched Preprints.org in May 2016 to provide researchers with a free platform to publish early findings."
+        },
+        {
+            q: "Which organization operates the Directory of Open Access Books (DOAB)?",
+            opts: ["OCLC", "DOAJ", "OAPEN", "IFLA"],
+            ans: 2,
+            exp: "The DOAB acts as a discovery service for peer-reviewed academic books and is managed jointly by the OAPEN Foundation and OpenEdition."
+        },
+        {
+            q: "Traditional Knowledge Digital Library (TKDL) is operated under which Ministries of the Government of India?",
+            opts: ["Ministry of Culture and Ministry of Education", "Ministry of Education and Ministry of Ayush", "Ministry of Ayush and Ministry of Science and Technology", "None of among these"],
+            ans: 2,
+            exp: "TKDL is a joint initiative (2001) between CSIR (Sci & Tech) and Ayush to translate ancient medicinal texts to prevent biopiracy."
+        },
+        {
+            q: "Find out the odd one among these:",
+            opts: ["OpenAI", "Anthropic", "Google", "Claude"],
+            ans: 3,
+            exp: "Claude is a specific AI product/model, whereas OpenAI, Anthropic, and Google are the actual tech organizations that develop AI products."
+        },
+        {
+            q: "Which organization is the central agency for the 'National Mission on Libraries (NML)'?",
+            opts: ["INFLIBNET", "NISCAIR", "National Library", "RRRLF"],
+            ans: 3,
+            exp: "The Raja Rammohun Roy Library Foundation in Kolkata is the nodal agency handling logistics and funding for the NML."
+        },
+        {
+            q: "Which of these is the premier database of research profiles of scientists/researchers/faculty members in India?",
+            opts: ["ShodhPrabha", "VIDWAN", "ORCID", "INFED"],
+            ans: 1,
+            exp: "Maintained by INFLIBNET, VIDWAN is India's premier expert database tracking academic affiliations and publications."
+        },
+        {
+            q: "\"LOCKSS Program\" initiative, which provides libraries with open-source technologies and services, was initiated by:",
+            opts: ["MIT Libraries", "Harvard Libraries", "Stanford Libraries", "UCL Libraies"],
+            ans: 2,
+            exp: "Founded in 1999 at Stanford, LOCKSS ('Lots of Copies Keep Stuff Safe') is a peer-to-peer digital preservation system."
+        },
+        {
+            q: "Who is regarded as the \"Father of the ISBN\"?",
+            opts: ["Gordon Foster", "Emery Koltay", "David Whitaker", "SR Ranganathan"],
+            ans: 2,
+            exp: "David Whitaker was a British publisher who successfully pushed to turn the original 9-digit Book Numbering code into a global standard."
+        },
+        {
+            q: "How much amount has been alloted for APC cost in ONOS scheme?",
+            opts: ["INR 150", "INR 150 Laks", "INR 1500 Crores", "INR 150 Crores"],
+            ans: 3,
+            exp: "Under the One Nation One Subscription scheme, the government allocated ₹150 Crore annually to fund Article Processing Charges (APCs)."
+        },
+        {
+            q: "One Nation, One Subscription (ONOS) scheme was launched by the Ministry of Education in which year?",
+            opts: ["2024", "2025", "2026", "None of these"],
+            ans: 1,
+            exp: "The Union Education Minister officially launched Phase I of the ONOS scheme on January 1, 2025."
+        },
+        {
+            q: "Which open-access model allows authors to deposit a version of their work in an institutional repository?",
+            opts: ["Gold OA", "Green OA", "Diamond OA", "Bronze OA"],
+            ans: 1,
+            exp: "Green OA (self-archiving) allows authors to publish behind a paywall but freely deposit a pre-print or post-print version into a repository."
+        },
+        {
+            q: "A library adopts an AI discovery system but users receive irrelevant results because the training data contains inconsistent metadata. What is the primary problem?",
+            opts: ["Algorithmic latency", "Data quality", "Hardware failure", "Network topology"],
+            ans: 1,
+            exp: "AI models suffer from the 'Garbage In, Garbage Out' rule. If metadata is inconsistent, AI algorithms cannot connect relationships accurately."
+        },
+        {
+            q: "What is the primary goal of a transformative agreement?",
+            opts: ["To increase journal subscription prices for university libraries", "To shift funds from subscription (read) models to open access (publish) models", "To eliminate peer review from academic publishing", "To give individual authors full ownership of publisher software"],
+            ans: 1,
+            exp: "Transformative agreements redirect money libraries historically paid to read journals toward covering open-access publication costs for authors."
+        }
+    ];
+
+    let currentScore = 0;
+    const form = document.getElementById('quizForm');
+    document.getElementById('total-score').innerText = quizData.length;
+
+    // Dynamically Generate Quiz Elements
+    quizData.forEach((item, index) => {
+        const qId = `q${index}`;
+        
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.id = `card-${qId}`;
+        
+        const qTitle = document.createElement('div');
+        qTitle.className = 'question';
+        // Auto-number based on index if not already numbered in string
+        let printTitle = item.q;
+        if (!/^\d+\./.test(printTitle)) printTitle = `${index + 1}. ${printTitle}`;
+        qTitle.innerText = printTitle;
+        card.appendChild(qTitle);
+
+        const optionsDiv = document.createElement('div');
+        optionsDiv.className = 'options';
+
+        item.opts.forEach((optText, optIndex) => {
+            const label = document.createElement('label');
+            label.className = 'option-label';
+            
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = qId;
+            radio.value = optIndex;
+
+            label.appendChild(radio);
+            label.appendChild(document.createTextNode(optText));
+            optionsDiv.appendChild(label);
+        });
+
+        card.appendChild(optionsDiv);
+
+        const expDiv = document.createElement('div');
+        expDiv.className = 'explanation';
+        expDiv.id = `exp-${qId}`;
+        expDiv.innerHTML = `<span class="gesture-icon">💡</span><strong>${item.opts[item.ans]}.</strong> ${item.exp}`;
+        
+        card.appendChild(expDiv);
+        form.appendChild(card);
+    });
+
+    // Telegram-style Confetti Effect Generator
+    function triggerTelegramEffect(element) {
+        const rect = element.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const colors = ['#2563eb', '#22c55e', '#eab308', '#ef4444', '#a855f7'];
+
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('confetti-particle');
+            
+            const size = Math.random() * 6 + 4; 
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            particle.style.backgroundColor = color;
+            particle.style.left = centerX + 'px';
+            particle.style.top = centerY + 'px';
+            
+            document.body.appendChild(particle);
+
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = 40 + Math.random() * 80; 
+            const tx = Math.cos(angle) * velocity;
+            const ty = Math.sin(angle) * velocity;
+
+            const animation = particle.animate([
+                { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+                { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`, opacity: 0 }
+            ], {
+                duration: 500 + Math.random() * 300,
+                easing: 'cubic-bezier(0, .9, .57, 1)'
+            });
+
+            animation.onfinish = () => particle.remove();
+        }
+    }
+
+    // Attach Event Listeners via Event Delegation
+    form.addEventListener('change', function(e) {
+        if (e.target.type === 'radio') {
+            const qId = e.target.name;
+            const selectedVal = parseInt(e.target.value);
+            const questionIndex = parseInt(qId.replace('q', ''));
+            const correctAns = quizData[questionIndex].ans;
+            
+            const allRadios = document.getElementsByName(qId);
+            
+            // Iterate & Style
+            allRadios.forEach(radio => {
+                radio.disabled = true;
+                const label = radio.parentElement;
+                label.classList.add('locked');
+                
+                const val = parseInt(radio.value);
+                if (val === correctAns) {
+                    label.classList.add('correct-answer');
+                    if (selectedVal === correctAns) {
+                        label.classList.add('correct-pulse');
+                        triggerTelegramEffect(label);
+                    }
+                } else if (val === selectedVal) {
+                    label.classList.add('wrong-answer');
+                }
+            });
+
+            if (selectedVal === correctAns) {
+                currentScore++;
+                document.getElementById('current-score').innerText = currentScore;
+            }
+
+            // Show explanation
+            document.getElementById(`exp-${qId}`).style.display = 'block';
+        }
+    });
+</script>
+
+</body>
+</html>
